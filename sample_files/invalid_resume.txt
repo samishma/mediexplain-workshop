@@ -1,0 +1,16 @@
+ALEXANDER CHEN - SENIOR FULL STACK SOFTWARE ENGINEER
+Email: alex.chen@example.com | GitHub: github.com/alexchen | LinkedIn: linkedin.com/in/alexchen
+
+EXPERIENCE:
+Staff Software Engineer - CloudScale Systems (2022 - Present)
+- Architected distributed microservices in Go, Python, and Kubernetes processing 50M daily events.
+- Led front-end migration to React, Next.js, and Tailwind CSS, reducing bundle size by 45%.
+- Implemented CI/CD pipelines with GitHub Actions and Terraform.
+
+EDUCATION:
+B.S. in Computer Science - University of Washington (2018 - 2022)
+
+TECHNICAL SKILLS:
+Languages: TypeScript, JavaScript, Python, Go, SQL, HTML/CSS
+Frameworks: React, Node.js, Express, FastAPI, Next.js
+Tools: Docker, Kubernetes, AWS, PostgreSQL, Redis, Git

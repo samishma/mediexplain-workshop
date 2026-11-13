@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediExplain - Medical Document Understanding & Reminder Assistant</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Mobile Toggle -->
+      <div class="flex items-center space-x-3">
+        <button id="mobileMenuBtn" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+        <div class="flex items-center space-x-2.5 cursor-pointer" onclick="navigateTo('dashboard')">
+          <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-200">
+            <i data-lucide="cross" class="w-5 h-5 fill-current"></i>
+          </div>
+          <span class="text-xl font-bold tracking-tight text-blue-900">Medi<span class="text-blue-600">Explain</span></span>
+        </div>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center space-x-3 sm:space-x-5">
+        
+        <!-- Language Selector -->
+        <div class="relative">
+          <button id="langMenuBtn" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition shadow-sm">
+            <i data-lucide="globe" class="w-4 h-4 text-slate-500"></i>
+            <span id="currentLangLabel">English</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+          </button>
+          <div id="langDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-50">
+            <button onclick="setLanguage('English')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between">
+              <span>English</span>
+              <span class="text-xs text-slate-400">EN</span>
+            </button>
+            <button onclick="setLanguage('Hindi')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between">
+              <span>हिन्दी (Hindi)</span>
+              <span class="text-xs text-slate-400">HI</span>
+            </button>
+            <button onclick="setLanguage('Kannada')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between">
+              <span>ಕನ್ನಡ (Kannada)</span>
+              <span class="text-xs text-slate-400">KN</span>
+            </button>
+            <button onclick="setLanguage('Spanish')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between">
+              <span>Español (Spanish)</span>
+              <span class="text-xs text-slate-400">ES</span>
+            </button>
+            <button onclick="setLanguage('French')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-between">
+              <span>Français (French)</span>
+              <span class="text-xs text-slate-400">FR</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Reminders / Notification Bell -->
+        <div class="relative">
+          <button id="notifBellBtn" onclick="toggleNotifDropdown()" class="p-2 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition relative">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span id="notifBadge" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
+          </button>
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span class="font-semibold text-sm text-slate-800">Alerts & Reminders</span>
+              <button onclick="triggerSampleReminderPopup()" class="text-xs text-blue-600 hover:underline font-medium">Test Pop-up</button>
+            </div>
+            <div id="notifList" class="divide-y divide-slate-100 max-h-64 overflow-y-auto mt-2">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Pill -->
+        <div class="flex items-center space-x-2 pl-2 border-l border-slate-200">
+          <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+          <span class="text-sm font-medium text-slate-700 hidden sm:inline">Hi, Samishma</span>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- APP CONTAINER (Sidebar + Main Content) -->
+  <div class="flex-1 max-w-[1600px] w-full mx-auto flex">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col justify-between p-4 hidden lg:flex">
+      <nav class="space-y-1.5">
+        <a href="#dashboard" onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-item active flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-blue-600 bg-blue-50/80">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span data-i18n="dashboard">Dashboard</span>
+        </a>
+        <a href="#reports" onclick="navigateTo('reports')" id="nav-reports" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-600 hover:text-blue-600 hover:bg-slate-50">
+          <i data-lucide="file-text" class="w-5 h-5"></i>
+          <span data-i18n="my_reports">My Reports</span>
+        </a>
+        <a href="#medicines" onclick="navigateTo('medicines')" id="nav-medicines" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-600 hover:text-blue-600 hover:bg-slate-50">
+          <i data-lucide="pill" class="w-5 h-5"></i>
+          <span data-i18n="medicine_explainer">Medicine Explainer</span>
+        </a>
+        <a href="#reminders" onclick="navigateTo('reminders')" id="nav-reminders" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-600 hover:text-blue-600 hover:bg-slate-50">
+          <i data-lucide="bell-ring" class="w-5 h-5"></i>
+          <span data-i18n="reminders">Reminders</span>
+        </a>
+        <a href="#appointments" onclick="navigateTo('appointments')" id="nav-appointments" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-600 hover:text-blue-600 hover:bg-slate-50">
+          <i data-lucide="calendar" class="w-5 h-5"></i>
+          <span data-i18n="appointments">Appointments</span>
+        </a>
+        <a href="#family" onclick="navigateTo('family')" id="nav-family" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-600 hover:text-blue-600 hover:bg-slate-50">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span data-i18n="family_access">Family Access</span>
+        </a>
+        <a href="#settings" onclick="navigateTo('settings')" id="nav-settings" class="nav-item flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-600 hover:text-blue-600 hover:bg-slate-50">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+          <span data-i18n="settings">Settings</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Tagline Card -->
+      <div class="mt-8 p-4 rounded-2xl bg-gradient-to-b from-blue-50/70 to-indigo-50/70 border border-blue-100 text-center">
+        <div class="w-10 h-10 mx-auto rounded-full bg-white shadow-sm flex items-center justify-center text-blue-600 mb-2">
+          <i data-lucide="activity" class="w-5 h-5"></i>
+        </div>
+        <p class="text-xs font-semibold text-slate-800">Better understanding</p>
+        <p class="text-xs text-slate-500">for a healthier you</p>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW AREA -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+
+      <!-- ================= 1. DASHBOARD VIEW ================= -->
+      <section id="view-dashboard" class="space-y-6">
+
+        <!-- Welcome Banner -->
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900" id="dashGreeting">Good afternoon, Samishma!</h1>
+          <p class="text-slate-500 text-sm sm:text-base mt-1" data-i18n="welcome_sub">Understand your medical documents, one step at a time.</p>
+        </div>
+
+        <!-- Red Flag Alert Banner (Conditional) -->
+        <div id="redFlagBanner" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-start space-x-3 text-rose-800">
+          <div class="p-2 rounded-xl bg-rose-100 text-rose-600 flex-shrink-0 mt-0.5">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-sm text-rose-900" id="redFlagTitle">Clinical Attention Notice: Gastroenteritis Discharge Precautions</h3>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-200 text-rose-800 uppercase tracking-wider">Red Flag Safety Alert</span>
+            </div>
+            <p class="text-xs sm:text-sm text-rose-700 mt-1" id="redFlagDesc">
+              Your hospital discharge summary advises seeking immediate medical care if you experience persistent high fever (>102°F), rigid abdomen, or inability to keep fluids down.
+            </p>
+            <div class="mt-2 flex items-center space-x-3">
+              <button onclick="openRedFlagModal()" class="text-xs font-semibold text-rose-800 hover:underline flex items-center space-x-1">
+                <span>View Clinical Safety Advice</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPLOAD DOCUMENT CARD -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                <i data-lucide="file-up" class="w-5 h-5 text-blue-600"></i>
+                <span data-i18n="upload_title">Upload Medical Document</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5" data-i18n="upload_subtitle">
+                Upload your lab report, prescription or discharge summary
+              </p>
+            </div>
+            <!-- Quick Sample Loaders -->
+            <div class="flex items-center space-x-2">
+              <span class="text-xs text-slate-400 font-medium">Quick Test:</span>
+              <button onclick="loadSampleDoc('sample-cbc')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                + Lab Report
+              </button>
+              <button onclick="loadSampleDoc('sample-rx')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition">
+                + Prescription
+              </button>
+              <button onclick="loadSampleDoc('sample-resume')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition" title="Test non-medical file rejection guardrail">
+                + Non-Medical File (Test Guardrail)
+              </button>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Dropzone -->
+          <div id="dropzone" class="border-2 border-dashed border-blue-200 hover:border-blue-400 rounded-2xl p-6 sm:p-8 text-center bg-blue-50/20 hover:bg-blue-50/40 transition flex flex-col items-center justify-center cursor-pointer">
+            <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-3">
+              <i data-lucide="cloud-upload" class="w-7 h-7"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-800" data-i18n="drag_drop">Drag and drop your file here</p>
+            <p class="text-xs text-slate-400 mt-1" data-i18n="supported_hint">PDF, JPG or PNG (Only medical documents)</p>
+            
+            <input type="file" id="fileInput" class="hidden" accept=".pdf,.png,.jpg,.jpeg,.txt">
+            <button onclick="document.getElementById('fileInput').click()" class="mt-4 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm shadow-sm transition flex items-center space-x-2">
+              <i data-lucide="folder-open" class="w-4 h-4"></i>
+              <span data-i18n="choose_file">Choose File</span>
+            </button>
+          </div>
+
+          <!-- Medical Only Policy Notice -->
+          <div class="mt-3 flex items-center space-x-2 text-xs text-slate-500">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+            <span>Only medical documents are accepted. Non-medical files (resumes, invoices, receipts) are automatically rejected.</span>
+          </div>
+        </div>
+
+        <!-- 4 QUICK ACTION CARDS (Pixel-matched with design) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Card 1: Explain a Report (Blue) -->
+          <div onclick="navigateTo('reports')" class="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm group-hover:text-blue-600 transition">Explain a Report</h3>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Get simple and easy-to-understand explanations of your medical documents.
+              </p>
+            </div>
+            <div class="mt-4 flex items-center text-xs font-semibold text-blue-600 space-x-1">
+              <span>View reports</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition"></i>
+            </div>
+          </div>
+
+          <!-- Card 2: Medicine Explainer (Green) -->
+          <div onclick="navigateTo('medicines')" class="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+                <i data-lucide="pill" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm group-hover:text-emerald-600 transition">Medicine Explainer</h3>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Understand what your medicines are for and how to safely take them.
+              </p>
+            </div>
+            <div class="mt-4 flex items-center text-xs font-semibold text-emerald-600 space-x-1">
+              <span>View medicines</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition"></i>
+            </div>
+          </div>
+
+          <!-- Card 3: Listen to Explanation (Purple) -->
+          <div onclick="playActiveSpeech()" class="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-purple-300 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
+                <i data-lucide="volume-2" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm group-hover:text-purple-600 transition">Listen to Explanation</h3>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Hear your medical information spoken aloud in your preferred language.
+              </p>
+            </div>
+            <div class="mt-4 flex items-center text-xs font-semibold text-purple-600 space-x-1">
+              <span id="quickAudioStatus">Play audio</span>
+              <i data-lucide="play" class="w-3.5 h-3.5 group-hover:scale-110 transition"></i>
+            </div>
+          </div>
+
+          <!-- Card 4: Questions for Your Doctor (Pink) -->
+          <div onclick="openDoctorQuestionsModal()" class="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-pink-300 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center mb-3">
+                <i data-lucide="help-circle" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm group-hover:text-pink-600 transition">Questions for Your Doctor</h3>
+              <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Get helpful questions to ask during your upcoming doctor appointment.
+              </p>
+            </div>
+            <div class="mt-4 flex items-center text-xs font-semibold text-pink-600 space-x-1">
+              <span>Explore questions</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition"></i>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TWO COLUMN SECTION: RECENT REPORTS & UPCOMING REMINDERS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Left Column: Recent Reports -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                <i data-lucide="file-check" class="w-5 h-5 text-slate-700"></i>
+                <span data-i18n="recent_reports">Recent Reports</span>
+              </h2>
+              <button onclick="navigateTo('reports')" class="text-xs font-semibold text-blue-600 hover:underline flex items-center space-x-1">
+                <span>View all</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <div id="recentReportsList" class="space-y-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Right Column: Upcoming Reminders -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                <i data-lucide="clock" class="w-5 h-5 text-slate-700"></i>
+                <span data-i18n="upcoming_reminders">Upcoming Reminders</span>
+              </h2>
+              <button onclick="navigateTo('reminders')" class="text-xs font-semibold text-blue-600 hover:underline flex items-center space-x-1">
+                <span>View all</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <div id="upcomingRemindersList" class="space-y-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= 2. MY REPORTS VIEW ================= -->
+      <section id="view-reports" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Medical Document History</h1>
+            <p class="text-sm text-slate-500">View, analyze, and listen to all your past medical records.</p>
+          </div>
+          <!-- Filter Tabs -->
+          <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button onclick="filterReports('All')" class="report-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-blue-600 shadow-sm" data-filter="All">All</button>
+            <button onclick="filterReports('Lab Report')" class="report-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900" data-filter="Lab Report">Lab Reports</button>
+            <button onclick="filterReports('Prescription')" class="report-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900" data-filter="Prescription">Prescriptions</button>
+            <button onclick="filterReports('Discharge Summary')" class="report-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900" data-filter="Discharge Summary">Discharge Summaries</button>
+          </div>
+        </div>
+
+        <!-- Full Reports Grid -->
+        <div id="allReportsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= 3. MEDICINE EXPLAINER VIEW ================= -->
+      <section id="view-medicines" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Medicine Explainer & Guidance</h1>
+            <p class="text-sm text-slate-500">Know exactly why each pill is prescribed, how to take it, and what foods to avoid.</p>
+          </div>
+          <button onclick="openAddReminderModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center space-x-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Set New Dose Reminder</span>
+          </button>
+        </div>
+
+        <div id="medicinesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= 4. REMINDERS VIEW ================= -->
+      <section id="view-reminders" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Medicine & Health Reminders</h1>
+            <p class="text-sm text-slate-500">Stay on schedule with sound alerts, push notifications, and dose logs.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="triggerSampleReminderPopup()" class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+              <i data-lucide="bell-ring" class="w-4 h-4 text-amber-600"></i>
+              <span>Trigger Test Pop-up</span>
+            </button>
+            <button onclick="openAddReminderModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add Reminder</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="fullRemindersList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= 5. APPOINTMENTS VIEW ================= -->
+      <section id="view-appointments" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Doctor Appointments</h1>
+            <p class="text-sm text-slate-500">Manage follow-ups and bring your personalized question checklist.</p>
+          </div>
+          <button onclick="openAddAppointmentModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Schedule Follow-up</span>
+          </button>
+        </div>
+
+        <div id="appointmentsList" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= 6. FAMILY ACCESS VIEW ================= -->
+      <section id="view-family" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">Family & Caregiver Access</h1>
+            <p class="text-sm text-slate-500">Securely grant trusted members access to view your medical explanations and reminders.</p>
+          </div>
+          <button onclick="openInviteMemberModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>Invite Trusted Member</span>
+          </button>
+        </div>
+
+        <!-- Trusted Members List -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6">
+          <h2 class="font-bold text-slate-900 text-base mb-4">Active Authorized Members</h2>
+          <div id="familyMembersList" class="divide-y divide-slate-100">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Sharing Audit Logs -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6">
+          <h2 class="font-bold text-slate-900 text-base mb-4 flex items-center space-x-2">
+            <i data-lucide="shield" class="w-5 h-5 text-blue-600"></i>
+            <span>Access & Activity Log</span>
+          </h2>
+          <div id="familyLogsList" class="divide-y divide-slate-100 text-xs">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. SETTINGS VIEW ================= -->
+      <section id="view-settings" class="hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">User Settings & Preferences</h1>
+          <p class="text-sm text-slate-500">Configure language, reading simplicity, and privacy defaults.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
+          <!-- Reading Level Preference -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-900 mb-2">Default Reading Level</label>
+            <p class="text-xs text-slate-500 mb-3">Controls how simple or clinical the generated explanations are.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label class="border rounded-xl p-3 flex items-start space-x-3 cursor-pointer hover:bg-slate-50 border-slate-200" id="opt-beginner">
+                <input type="radio" name="readingLevelSetting" value="Beginner" onchange="setReadingLevel('Beginner')" class="mt-1">
+                <div>
+                  <span class="block text-xs font-bold text-slate-800">Beginner (5th Grade)</span>
+                  <span class="text-xs text-slate-500">Simple analogies, zero jargon.</span>
+                </div>
+              </label>
+              <label class="border rounded-xl p-3 flex items-start space-x-3 cursor-pointer hover:bg-slate-50 border-blue-500 bg-blue-50/30" id="opt-standard">
+                <input type="radio" name="readingLevelSetting" value="Standard" checked onchange="setReadingLevel('Standard')" class="mt-1">
+                <div>
+                  <span class="block text-xs font-bold text-slate-800">Standard (8th Grade)</span>
+                  <span class="text-xs text-slate-500">Patient-friendly terms explained clearly.</span>
+                </div>
+              </label>
+              <label class="border rounded-xl p-3 flex items-start space-x-3 cursor-pointer hover:bg-slate-50 border-slate-200" id="opt-detailed">
+                <input type="radio" name="readingLevelSetting" value="Detailed" onchange="setReadingLevel('Detailed')" class="mt-1">
+                <div>
+                  <span class="block text-xs font-bold text-slate-800">Detailed (High Literacy)</span>
+                  <span class="text-xs text-slate-500">In-depth physiology and exact ranges.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Medical Safety Verification -->
+          <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+            <div>
+              <span class="font-semibold text-sm text-slate-800 block">Strict Medical File Filter</span>
+              <span class="text-xs text-slate-500">Automatically rejects non-medical files before AI processing.</span>
+            </div>
+            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Enabled</span>
+          </div>
+
+          <!-- Audio Voice Setting -->
+          <div class="pt-6 border-t border-slate-100">
+            <span class="font-semibold text-sm text-slate-800 block mb-2">Speech Synthesis Voice</span>
+            <select id="ttsVoiceSelect" class="border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 w-full sm:w-80">
+              <!-- Populated by JS Web Speech API -->
+            </select>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BOTTOM DISCLAIMER BAR (Present on all views, matching mockup) -->
+  <footer class="bg-white border-t border-slate-200 py-3.5 px-4 text-center">
+    <div class="max-w-[1600px] mx-auto flex items-center justify-center space-x-2 text-xs sm:text-sm text-slate-600">
+      <div class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+      </div>
+      <span id="footerDisclaimer" data-i18n="disclaimer">
+        MediExplain helps you understand your medical documents. It does not diagnose or replace advice from a healthcare professional.
+      </span>
+    </div>
+  </footer>
+
+  <!-- ================= MODALS & POP-UPS ================= -->
+
+  <!-- 1. LIVE REMINDER POP-UP (Modal alert with audio chime) -->
+  <div id="reminderModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-bounce-subtle">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-inner">
+          <i data-lucide="bell-ring" class="w-6 h-6 animate-pulse"></i>
+        </div>
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Medicine Dose Reminder</span>
+          <h3 class="text-xl font-bold text-slate-900" id="reminderModalTitle">Paracetamol 500mg</h3>
+        </div>
+      </div>
+
+      <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-4 text-sm text-slate-700 space-y-2 mb-5">
+        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+          <span>Scheduled Time</span>
+          <span class="font-bold text-slate-800" id="reminderModalTime">8:00 AM (Now)</span>
+        </div>
+        <p class="font-medium text-slate-800" id="reminderModalDose">Dose: 1 Tablet (500mg)</p>
+        <p class="text-xs text-slate-600" id="reminderModalInstr">Take after breakfast with a full glass of water.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="snoozeReminder()" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-sm transition">
+          ⏰ Snooze 10m
+        </button>
+        <button onclick="markReminderTaken()" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md transition">
+          ✅ Mark as Taken
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. DOCUMENT DETAIL & EXPLAINER MODAL -->
+  <div id="reportDetailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 my-8 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Header -->
+      <div class="flex items-start justify-between pb-4 border-b border-slate-100">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span id="detailBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase">Lab Report</span>
+            <span class="text-xs text-slate-400" id="detailDate">12 Nov 2026</span>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1" id="detailTitle">Blood Test Report</h2>
+        </div>
+        <button onclick="closeReportDetailModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <!-- Controls: Reading Level & TTS Player -->
+      <div class="mt-5 p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Reading Level Toggle -->
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-semibold text-slate-500">Reading Level:</span>
+          <div class="flex items-center bg-white rounded-xl p-0.5 border border-slate-200">
+            <button onclick="changeDocReadingLevel('Beginner')" id="btn-lvl-beginner" class="px-2.5 py-1 text-xs rounded-lg font-medium text-slate-600">Beginner</button>
+            <button onclick="changeDocReadingLevel('Standard')" id="btn-lvl-standard" class="px-2.5 py-1 text-xs rounded-lg font-medium bg-blue-600 text-white shadow-sm">Standard</button>
+            <button onclick="changeDocReadingLevel('Detailed')" id="btn-lvl-detailed" class="px-2.5 py-1 text-xs rounded-lg font-medium text-slate-600">Detailed</button>
+          </div>
+        </div>
+
+        <!-- TTS Audio Player Widget -->
+        <div class="flex items-center space-x-2">
+          <button id="ttsPlayBtn" onclick="toggleTTSPlayback()" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
+            <i data-lucide="volume-2" class="w-4 h-4"></i>
+            <span id="ttsBtnLabel">Listen Aloud</span>
+          </button>
+          <button id="ttsStopBtn" onclick="stopTTSPlayback()" class="p-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs">
+            <i data-lucide="square" class="w-4 h-4"></i>
+          </button>
+          <select id="ttsSpeedSelect" onchange="changeTTSSpeed(this.value)" class="text-xs border border-slate-200 rounded-xl px-2 py-1 bg-white text-slate-700">
+            <option value="0.8">0.8x</option>
+            <option value="1.0" selected>1.0x</option>
+            <option value="1.2">1.2x</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Plain Language Explanation Box -->
+      <div class="mt-5">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2 mb-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-blue-600"></i>
+          <span>Plain-Language Summary</span>
+        </h3>
+        <div id="detailExplanationText" class="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 text-slate-700 text-sm leading-relaxed">
+          <!-- Text loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Values Status Table (If Lab Report) -->
+      <div id="detailValuesSection" class="mt-6">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2 mb-3">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 text-slate-700"></i>
+          <span>Extracted Test Values & Reference Ranges</span>
+        </h3>
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-semibold">
+                <tr>
+                  <th class="p-3">Test Name</th>
+                  <th class="p-3">Your Value</th>
+                  <th class="p-3">Standard Range</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3">Plain Meaning</th>
+                </tr>
+              </thead>
+              <tbody id="detailValuesTableBody" class="divide-y divide-slate-100">
+                <!-- Injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medicines Section (If Prescription) -->
+      <div id="detailMedsSection" class="mt-6 hidden">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2 mb-3">
+          <i data-lucide="pill" class="w-4 h-4 text-emerald-600"></i>
+          <span>Prescribed Medications & Guidance</span>
+        </h3>
+        <div id="detailMedsList" class="space-y-3">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <!-- Doctor Questions Section -->
+      <div id="detailQuestionsSection" class="mt-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+            <i data-lucide="help-circle" class="w-4 h-4 text-pink-600"></i>
+            <span>Questions Recommended for Your Doctor</span>
+          </h3>
+          <button onclick="copyQuestionsToClipboard()" class="text-xs font-semibold text-blue-600 hover:underline flex items-center space-x-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Copy Checklist</span>
+          </button>
+        </div>
+        <div id="detailQuestionsList" class="space-y-2">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. NON-MEDICAL FILE REJECTION MODAL -->
+  <div id="fileRejectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 text-center">
+      <div class="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="shield-alert" class="w-7 h-7"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900">Medical Document Guardrail</h3>
+      <div class="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed" id="rejectModalMsg">
+        The uploaded document does not appear to be a medical document.
+      </div>
+      <div class="mt-4 p-3 bg-slate-50 rounded-2xl text-xs text-slate-500 text-left space-y-1">
+        <p class="font-semibold text-slate-700">MediExplain accepts only:</p>
+        <p>✓ Laboratory blood and urine test reports</p>
+        <p>✓ Doctor's prescriptions (Rx)</p>
+        <p>✓ Hospital discharge summaries</p>
+      </div>
+      <button onclick="closeRejectModal()" class="mt-5 w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition">
+        I Understand
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. ADD REMINDER MODAL -->
+  <div id="addReminderModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="font-bold text-slate-900 text-lg">Add Medicine Reminder</h3>
+        <button onclick="closeAddReminderModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="handleCreateReminder(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Medicine Name & Strength</label>
+          <input type="text" id="remMedName" required placeholder="e.g. Paracetamol 500mg" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Dose / Frequency</label>
+          <input type="text" id="remDose" required placeholder="e.g. 1 Tablet three times daily" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Reminder Time</label>
+          <input type="time" id="remTime" required value="08:00" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Instructions</label>
+          <input type="text" id="remInstr" placeholder="e.g. Take after breakfast with water" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition mt-2">
+          Save Reminder
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. INVITE FAMILY MEMBER MODAL -->
+  <div id="inviteMemberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="font-bold text-slate-900 text-lg">Invite Trusted Member</h3>
+        <button onclick="closeInviteMemberModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="handleInviteMember(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+          <input type="text" id="inviteName" required placeholder="e.g. Rahul Patel" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="inviteEmail" required placeholder="e.g. rahul@example.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Relationship</label>
+          <select id="inviteRel" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+            <option value="Spouse">Spouse</option>
+            <option value="Child / Adult Child">Child / Adult Child</option>
+            <option value="Parent">Parent</option>
+            <option value="Caregiver">Caregiver</option>
+            <option value="Family Physician">Family Physician</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Access Scope</label>
+          <select id="invitePerm" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+            <option value="Full Access">Full Access (All Reports & Reminders)</option>
+            <option value="Lab Only">Lab Only (Blood & Urine Tests)</option>
+            <option value="Prescriptions Only">Prescriptions Only</option>
+            <option value="Emergency Only">Emergency Only</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition mt-2">
+          Grant Access
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+OFFICE DEPOT & SUPPLIES INC.
+INVOICE #INV-2026-99381
+Date: 12-Nov-2026 | Due Date: 26-Nov-2026
+
+BILL TO:
+Acme Corporation
+Attn: Accounts Payable
+100 Corporate Blvd, Suite 400
+
+ITEMS PURCHASED:
+1. Ergonomic Mesh Office Chair (SKU #88219) - Quantity: 4 - Unit Price: $189.99 - Total: $759.96
+2. Dual Monitor Desk Mount (SKU #44102) - Quantity: 4 - Unit Price: $49.50 - Total: $198.00
+3. Multipurpose Copy Paper 20lb (Carton) - Quantity: 10 - Unit Price: $42.00 - Total: $420.00
+
+Subtotal: $1,377.96
+Sales Tax (8.25%): $113.68
+Shipping & Handling: $45.00
+TOTAL AMOUNT DUE: $1,536.64
+
+Payment Terms: Net 14 Days. Thank you for your business!

@@ -1,0 +1,21 @@
+APOLLO HEALTH CENTER - DISCHARGE SUMMARY
+PATIENT: Samishma Patel | ADMISSION DATE: 03-Nov-2026 | DISCHARGE: 05-Nov-2026
+ADMITTING DIAGNOSIS: Acute Gastroenteritis with Mild Dehydration
+TREATING PHYSICIAN: Dr. R. Verma, MD / Dr. A. Sharma, MD
+
+HOSPITAL COURSE:
+Patient presented with nausea, vomiting and low-grade pyrexia. Managed conservatively with IV hydration (Normal Saline 1L), antiemetics (Ondansetron), and oral rehydration therapy. Patient tolerated soft diet on hospital day 2. Vital signs stable at discharge: BP 118/76 mmHg, Pulse 72 bpm, SpO2 99% on room air, Afebrile.
+
+DISCHARGE MEDICATIONS:
+1. Pantoprazole 40mg - 1 tablet OD (morning before breakfast) x 7 days.
+2. Probiotic Sachets - 1 sachet twice daily in curd or water x 5 days.
+
+RED FLAG WARNINGS / PRECAUTIONS:
+Seek immediate emergency medical attention if you experience:
+- Persistent high fever (> 102°F)
+- Severe abdominal pain or rigid abdomen
+- Repeated vomiting preventing fluid intake
+- Blood in stool or dark tarry stools
+
+FOLLOW-UP:
+Follow up in outpatient clinic with Dr. Sharma in 7-10 days.

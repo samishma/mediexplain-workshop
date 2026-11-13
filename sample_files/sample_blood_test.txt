@@ -1,0 +1,17 @@
+METROPOLITAN CLINICAL LABS - COMPREHENSIVE LAB PANEL
+PATIENT: Samishma Patel | AGE: 34 | GENDER: Female
+DATE: 12-Nov-2026 | PHYSICIAN: Dr. A. Sharma, MD
+
+COMPLETE BLOOD COUNT (CBC) & METABOLIC PANEL
+Fasting Blood Glucose: 112 mg/dL (Reference Range: 70 - 99 mg/dL) [HIGH]
+Hemoglobin (Hb): 13.6 g/dL (Reference Range: 12.0 - 15.5 g/dL) [NORMAL]
+Total WBC Count: 6,800 /mcL (Reference Range: 4,500 - 11,000 /mcL) [NORMAL]
+Platelet Count: 245,000 /mcL (Reference Range: 150,000 - 450,000 /mcL) [NORMAL]
+Serum Creatinine: 0.9 mg/dL (Reference Range: 0.5 - 1.1 mg/dL) [NORMAL]
+Total Cholesterol: 215 mg/dL (Reference Range: < 200 mg/dL) [BORDERLINE HIGH]
+LDL Cholesterol: 138 mg/dL (Reference Range: < 100 mg/dL) [ELEVATED]
+HDL Cholesterol: 54 mg/dL (Reference Range: > 50 mg/dL) [OPTIMAL]
+Serum Potassium: 4.4 mEq/L (Reference Range: 3.5 - 5.1 mEq/L) [NORMAL]
+HbA1c: 5.8 % (Reference Range: 4.0 - 5.6 %) [PREDIABETES RANGE]
+
+END OF REPORT - Verified by Chief Clinical Pathologist
